@@ -15,7 +15,12 @@ require __DIR__ . '/../includes/header.php';
 <section class="panel">
     <p class="eyebrow">Administrator</p>
     <h1>Hello, <?= e($user['full_name']) ?></h1>
-    <p>You are signed in as an administrator. Account, menu, and report tools will be added in later phases.</p>
+    <p>You are signed in as an administrator. Manage the menu and kitchen staff below. Reports will be added in a later phase.</p>
+    <div class="actions">
+        <a class="button" href="<?= e(url('admin/categories.php')) ?>">Manage categories</a>
+        <a class="button" href="<?= e(url('admin/foods.php')) ?>">Manage food items</a>
+        <a class="button button-secondary" href="<?= e(url('admin/staff.php')) ?>">Kitchen staff accounts</a>
+    </div>
     <dl class="details">
         <div>
             <dt>Name</dt>

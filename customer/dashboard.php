@@ -15,7 +15,10 @@ require __DIR__ . '/../includes/header.php';
 <section class="panel">
     <p class="eyebrow">Customer</p>
     <h1>Hello, <?= e($user['full_name']) ?></h1>
-    <p>You are signed in. The menu, cart, and order tracking will be added in the next phases.</p>
+    <p>You are signed in. You can browse the menu now. The cart and order tracking will be added in later phases.</p>
+    <div class="actions">
+        <a class="button" href="<?= e(url('customer/menu.php')) ?>">Browse the menu</a>
+    </div>
     <dl class="details">
         <div>
             <dt>Name</dt>

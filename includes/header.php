@@ -31,6 +31,13 @@ $homePath = $currentUser ? home_path_for_role($currentUser['role']) : null;
                 <a href="<?= e(url('index.php')) ?>">Home</a>
                 <?php if ($currentUser && $homePath): ?>
                     <a href="<?= e(url($homePath)) ?>">Dashboard</a>
+                    <?php if ($currentUser['role'] === 'CUSTOMER'): ?>
+                        <a href="<?= e(url('customer/menu.php')) ?>">Menu</a>
+                    <?php elseif ($currentUser['role'] === 'ADMIN'): ?>
+                        <a href="<?= e(url('admin/categories.php')) ?>">Categories</a>
+                        <a href="<?= e(url('admin/foods.php')) ?>">Food items</a>
+                        <a href="<?= e(url('admin/staff.php')) ?>">Staff</a>
+                    <?php endif; ?>
                     <form method="post" action="<?= e(url('logout.php')) ?>">
                         <?= csrf_field() ?>
                         <button class="button-link" type="submit">Log out</button>
