@@ -11,6 +11,11 @@ $pageTitle = (isset($pageTitle) && is_string($pageTitle) && $pageTitle !== '')
     : 'Digital Canteen';
 $currentUser = current_user();
 $homePath = $currentUser ? home_path_for_role($currentUser['role']) : null;
+$cartItemCount = 0;
+if ($currentUser && $currentUser['role'] === 'CUSTOMER') {
+    require_once __DIR__ . '/cart.php';
+    $cartItemCount = cart_count((int) $currentUser['id']);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,6 +38,8 @@ $homePath = $currentUser ? home_path_for_role($currentUser['role']) : null;
                     <a href="<?= e(url($homePath)) ?>">Dashboard</a>
                     <?php if ($currentUser['role'] === 'CUSTOMER'): ?>
                         <a href="<?= e(url('customer/menu.php')) ?>">Menu</a>
+                        <a href="<?= e(url('customer/cart.php')) ?>">Cart <span class="cart-count" data-cart-count<?= $cartItemCount > 0 ? '' : ' hidden' ?>><?= e((string) $cartItemCount) ?></span></a>
+                        <a href="<?= e(url('customer/orders.php')) ?>">My orders</a>
                     <?php elseif ($currentUser['role'] === 'ADMIN'): ?>
                         <a href="<?= e(url('admin/categories.php')) ?>">Categories</a>
                         <a href="<?= e(url('admin/foods.php')) ?>">Food items</a>

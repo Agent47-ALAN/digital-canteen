@@ -9,6 +9,8 @@
     var DC = window.DC;
     var api = app.getAttribute('data-api');
     var loginUrl = app.getAttribute('data-login');
+    var cartApi = app.getAttribute('data-cart-api');
+    var csrf = app.getAttribute('data-csrf');
 
     var searchInput = document.getElementById('menu-search');
     var chipBox = document.getElementById('menu-chips');
@@ -51,6 +53,25 @@
         });
     }
 
+    function addToCart(item, button) {
+        button.disabled = true;
+        DC.request('POST', cartApi, {
+            csrf_token: csrf,
+            action: 'add',
+            food_item_id: item.id,
+            quantity: 1
+        }, function (result) {
+            button.disabled = false;
+            if (DC.sessionEnded(result, loginUrl)) {
+                return;
+            }
+            DC.showStatus(statusBox, result.success ? 'success' : 'error', result.message);
+            if (result.success && result.data && result.data.cart) {
+                DC.setCartCount(result.data.cart.count);
+            }
+        });
+    }
+
     function renderItems(items) {
         grid.textContent = '';
 
@@ -72,6 +93,12 @@
                     })
                 ])
             ]);
+            if (item.is_available) {
+                var addButton = DC.el('button', { type: 'button', className: 'button button-small add-button', text: 'Add to cart' });
+                addButton.setAttribute('aria-label', 'Add ' + item.name + ' to cart');
+                addButton.addEventListener('click', function () { addToCart(item, addButton); });
+                card.appendChild(addButton);
+            }
             grid.appendChild(card);
         });
     }

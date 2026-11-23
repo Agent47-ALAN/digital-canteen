@@ -131,7 +131,17 @@
         return false;
     }
 
+    /** Update the cart badge in the header. */
+    function setCartCount(count) {
+        var badges = document.querySelectorAll('[data-cart-count]');
+        Array.prototype.forEach.call(badges, function (node) {
+            node.textContent = String(count);
+            node.hidden = !count;
+        });
+    }
+
     window.DC = {
+        setCartCount: setCartCount,
         request: request,
         el: el,
         money: money,

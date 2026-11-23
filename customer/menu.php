@@ -9,11 +9,13 @@ require __DIR__ . '/../includes/header.php';
 ?>
 <div id="app"
      data-api="<?= e(url('api/customer/menu.php')) ?>"
+     data-cart-api="<?= e(url('api/customer/cart.php')) ?>"
+     data-csrf="<?= e(csrf_token()) ?>"
      data-login="<?= e(url('login.php')) ?>">
     <section class="panel">
         <p class="eyebrow">Customer</p>
         <h1>Today&rsquo;s menu</h1>
-        <p>Browse what the canteen serves. Ordering will be added in a later phase.</p>
+        <p>Browse what the canteen serves, add items to your cart, then check out. <a href="<?= e(url('customer/cart.php')) ?>">View your cart</a></p>
         <form id="menu-form" class="menu-search" role="search">
             <label for="menu-search">Search the menu</label>
             <input id="menu-search" type="search" maxlength="100" placeholder="Search by name or description" autocomplete="off">

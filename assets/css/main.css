@@ -638,3 +638,237 @@ button:disabled {
         letter-spacing: 0.05em;
     }
 }
+
+/* ===== Phase 3: cart, checkout, orders ===== */
+
+.cart-count {
+    display: inline-block;
+    min-width: 1.35rem;
+    padding: 0 0.4rem;
+    border-radius: 999px;
+    background: var(--orange);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.35rem;
+    text-align: center;
+}
+
+.alert-notice {
+    background: #f6e9d9;
+    border: 1px solid #e3c9a8;
+    color: #6b3a14;
+}
+
+.add-button {
+    margin-top: 0.75rem;
+    align-self: flex-start;
+}
+
+.qty-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.qty-button {
+    min-width: 2rem;
+    padding: 0.2rem 0.5rem;
+    line-height: 1.2;
+}
+
+.qty-value {
+    min-width: 1.5rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+.data-table tfoot th,
+.data-table tfoot td {
+    border-bottom: 0;
+    border-top: 2px solid var(--ink);
+    font-weight: 700;
+}
+
+.data-table tfoot th {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 1rem;
+    color: var(--ink);
+}
+
+.is-problem {
+    background: var(--danger-bg);
+}
+
+.problem-text {
+    color: var(--danger);
+}
+
+.method-list {
+    border: 0;
+    margin: 0 0 1rem;
+    padding: 0;
+}
+
+.method-list legend {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    padding: 0;
+}
+
+.method {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    border: 1px solid #cfc6b8;
+    border-radius: 4px;
+    background: #fff;
+    padding: 0.8rem 0.9rem;
+    margin-bottom: 0.6rem;
+    cursor: pointer;
+}
+
+.method:hover {
+    border-color: var(--ink);
+}
+
+.method input[type="radio"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex: none;
+    margin-top: 0.2rem;
+    padding: 0;
+    accent-color: var(--green);
+}
+
+.method span {
+    display: block;
+}
+
+.method small {
+    display: block;
+    color: var(--muted);
+    margin-top: 0.15rem;
+}
+
+.demo-panel {
+    border: 2px dashed var(--orange);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: #fbf3e8;
+}
+
+.demo-banner {
+    margin: 0 0 0.6rem;
+    color: var(--orange);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.demo-amount {
+    margin: 0 0 0.8rem;
+    font-size: 1.15rem;
+}
+
+.token-card {
+    background: var(--green);
+    color: #fff;
+    border-radius: 4px;
+    padding: 1.5rem 1rem;
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.token-label {
+    margin: 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.token-number {
+    margin: 0.3rem 0;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    word-break: break-all;
+}
+
+.token-hint {
+    margin: 0;
+}
+
+.success-banner {
+    border-left: 6px solid var(--green);
+}
+
+.order-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: 1rem;
+}
+
+.order-list .empty-state {
+    grid-column: 1 / -1;
+}
+
+.order-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.order-card-head,
+.order-lines,
+.order-pay {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.order-token {
+    margin: 0;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.order-meta {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.order-card .button {
+    align-self: flex-start;
+    margin-top: 0.4rem;
+}
+
+@media (max-width: 800px) {
+    .token-number {
+        font-size: 2.2rem;
+    }
+
+    .data-table tfoot,
+    .data-table tfoot tr {
+        display: block;
+    }
+
+    .data-table tfoot th,
+    .data-table tfoot td:empty {
+        display: none;
+    }
+
+    .data-table tfoot td {
+        border-top: 0;
+    }
+}
