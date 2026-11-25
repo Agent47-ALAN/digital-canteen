@@ -140,7 +140,19 @@
         });
     }
 
+    /** Badge colour name for an order status. Keep in step with order_status_kind() in includes/orders.php. */
+    function statusKind(status) {
+        return { PLACED: 'info', PREPARING: 'warn', READY: 'on', COLLECTED: 'muted', CANCELLED: 'off' }[status] || 'muted';
+    }
+
+    /** Badge colour name for a payment status. */
+    function paymentKind(status) {
+        return { PAID: 'on', PENDING: 'warn', FAILED: 'off' }[status] || 'muted';
+    }
+
     window.DC = {
+        statusKind: statusKind,
+        paymentKind: paymentKind,
         setCartCount: setCartCount,
         request: request,
         el: el,

@@ -46,7 +46,15 @@ require __DIR__ . '/../includes/header.php';
     <p>Thank you! Your order is in the queue. Keep your token ready.</p>
 </section>
 
+<div id="app"
+     data-api="<?= e(url('api/orders/history.php')) ?>"
+     data-order-id="<?= e((string) $order['id']) ?>"
+     data-status="<?= e((string) $order['status']) ?>"
+     data-login="<?= e(url('login.php')) ?>">
 <?php render_order_detail($order); ?>
+</div>
+<script src="<?= e(url('assets/js/app.js')) ?>"></script>
+<script src="<?= e(url('assets/js/order-track.js')) ?>"></script>
 
 <div class="actions section-gap">
     <a class="button" href="<?= e(url('customer/orders.php')) ?>">My orders</a>

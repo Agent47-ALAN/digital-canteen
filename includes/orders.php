@@ -238,6 +238,32 @@ function order_status_label(string $status): string
     };
 }
 
+/** Badge colour name for a status. Keep in step with DC.statusKind() in assets/js/app.js. */
+function order_status_kind(string $status): string
+{
+    return match ($status) {
+        'PLACED' => 'info',
+        'PREPARING' => 'warn',
+        'READY' => 'on',
+        'COLLECTED' => 'muted',
+        'CANCELLED' => 'off',
+        default => 'muted',
+    };
+}
+
+/** One friendly sentence for the customer about where their order is. */
+function order_status_hint(string $status): string
+{
+    return match ($status) {
+        'PLACED' => 'Your order has been received and is waiting for the kitchen.',
+        'PREPARING' => 'The kitchen is preparing your order.',
+        'READY' => 'Your order is ready! Show your token at the counter to collect it.',
+        'COLLECTED' => 'You have collected this order. Enjoy your meal!',
+        'CANCELLED' => 'This order was cancelled.',
+        default => '',
+    };
+}
+
 function format_order_time(string $databaseTime): string
 {
     $date = DateTime::createFromFormat('Y-m-d H:i:s', $databaseTime);
@@ -264,6 +290,7 @@ function order_summary_from_row(array $row): array
         'item_count' => (int) ($row['item_count'] ?? 0),
         'status' => (string) $row['status'],
         'status_label' => order_status_label((string) $row['status']),
+        'status_hint' => order_status_hint((string) $row['status']),
         'payment_method' => $method,
         'payment_method_label' => payment_method_label($method),
         'payment_status' => $paymentStatus,

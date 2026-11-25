@@ -46,5 +46,13 @@ require __DIR__ . '/../includes/header.php';
     <p><a href="<?= e(url('customer/orders.php')) ?>">&larr; Back to My orders</a></p>
 </section>
 
+<div id="app"
+     data-api="<?= e(url('api/orders/history.php')) ?>"
+     data-order-id="<?= e((string) $order['id']) ?>"
+     data-status="<?= e((string) $order['status']) ?>"
+     data-login="<?= e(url('login.php')) ?>">
 <?php render_order_detail($order); ?>
+</div>
+<script src="<?= e(url('assets/js/app.js')) ?>"></script>
+<script src="<?= e(url('assets/js/order-track.js')) ?>"></script>
 <?php require __DIR__ . '/../includes/footer.php'; ?>
