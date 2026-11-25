@@ -232,3 +232,5 @@ function validate_new_account(string $fullName, string $email, string $password,
 
     return $errors;
 }
+
+
