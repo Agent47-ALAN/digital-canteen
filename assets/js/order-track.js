@@ -79,27 +79,34 @@
         inFlight = true;
 
         DC.request('GET', api, { id: orderId }, function (result) {
-            inFlight = false;
+            // Always release the lock — even if apply() somehow throws — so
+            // the next tick is never permanently blocked.
+            try {
+                if (DC.sessionEnded(result, loginUrl)) {
+                    return;
+                }
+                if (result.status === 404) {
+                    stop();
+                    showNote('This order could not be found any more.');
+                    return;
+                }
+                // Guard against null data (500 errors, unexpected server
+                // responses) so a bad response is treated as a retryable
+                // network hiccup rather than crashing the callback.
+                if (!result.success || !result.data || !result.data.order) {
+                    showNote('Connection problem. Trying again\u2026');
+                    return;
+                }
 
-            if (DC.sessionEnded(result, loginUrl)) {
-                return;
-            }
-            if (result.status === 404) {
-                stop();
-                showNote('This order could not be found any more.');
-                return;
-            }
-            if (!result.success) {
-                showNote('Connection problem. Trying again\u2026');
-                return;
-            }
-
-            apply(result.data.order);
-            if (isFinished(result.data.order.status)) {
-                stop();
-                showNote('This order is complete, so live updates have stopped.');
-            } else {
-                showNote('Status updates automatically. Last checked ' + new Date().toLocaleTimeString() + '.');
+                apply(result.data.order);
+                if (isFinished(result.data.order.status)) {
+                    stop();
+                    showNote('This order is complete, so live updates have stopped.');
+                } else {
+                    showNote('Status updates automatically. Last checked ' + new Date().toLocaleTimeString() + '.');
+                }
+            } finally {
+                inFlight = false;
             }
         });
     }
@@ -110,11 +117,21 @@
     }
 
     showNote('Status updates automatically.');
+
+    // Poll immediately on load so the displayed status is never stale from
+    // the moment the page was served, then continue on a fixed interval.
+    // This is the key fix: without an initial call the first update is delayed
+    // by a full POLL_MS (8 s) even if the status changed while navigating.
+    poll();
+
     timer = window.setInterval(function () {
         if (!document.hidden) {
             poll();
         }
     }, POLL_MS);
+
+    // When the customer returns from the background (e.g. switching apps on
+    // mobile) fire immediately instead of waiting for the next tick.
     document.addEventListener('visibilitychange', function () {
         if (!document.hidden && timer !== null) {
             poll();

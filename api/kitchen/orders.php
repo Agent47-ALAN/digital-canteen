@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../includes/api.php';
 require_once __DIR__ . '/../../includes/kitchen.php';
 
 // Kitchen staff only. Customers and admins get 403, visitors get 401.
-api_require_role('KITCHEN_STAFF');
+$user = api_require_role('KITCHEN_STAFF');
 $method = api_require_method('GET', 'POST');
 
 try {
@@ -41,28 +41,20 @@ try {
 
     api_require_csrf();
 
-    $action = post_value('action');
+    if (post_value('action') !== 'update_status') {
+        json_response(false, 'Unknown action.', null, 400);
+    }
 
-    // Only the order id and the requested action/status are read.
-    // Payment details are always checked on the server.
+    // Only an order id and the wanted status are read. Nothing about payments,
+    // items, totals or customers is accepted from the browser.
     $orderId = api_int(post_value('order_id'));
     if ($orderId === null) {
         json_response(false, 'That order could not be found.', null, 422);
     }
 
-    if ($action === 'update_status') {
-        $result = kitchen_update_status($pdo, $orderId, post_value('status'));
+    $result = kitchen_update_status($pdo, $orderId, post_value('status'), (int) $user['id']);
 
-        json_response(true, 'Order moved to ' . $result['status_label'] . '.', ['order' => $result]);
-    }
-
-    if ($action === 'confirm_cash_payment') {
-        $result = kitchen_confirm_cash_payment($pdo, $orderId);
-
-        json_response(true, 'Cash payment confirmed successfully.', ['payment' => $result]);
-    }
-
-    json_response(false, 'Unknown action.', null, 400);
+    json_response(true, 'Order moved to ' . $result['status_label'] . '.', ['order' => $result]);
 } catch (KitchenException $exception) {
     json_response(false, $exception->getMessage(), null, $exception->status());
 } catch (Throwable $exception) {

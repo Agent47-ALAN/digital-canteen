@@ -10,6 +10,7 @@
     var api = app.getAttribute('data-api');
     var loginUrl = app.getAttribute('data-login');
     var cartApi = app.getAttribute('data-cart-api');
+    var imageBase = app.getAttribute('data-image-base') || '';
     var csrf = app.getAttribute('data-csrf');
 
     var searchInput = document.getElementById('menu-search');
@@ -17,6 +18,12 @@
     var grid = document.getElementById('menu-grid');
     var countText = document.getElementById('menu-count');
     var statusBox = document.getElementById('status');
+    var modal = document.getElementById('dish-modal');
+    var modalTitle = document.getElementById('dish-modal-title');
+    var modalPrice = document.getElementById('dish-modal-price');
+    var modalDesc = document.getElementById('dish-modal-desc');
+    var modalClose = document.getElementById('dish-modal-close');
+    var lastFocused = null;
 
     var selectedCategory = '';
     var currentRequest = null;
@@ -72,6 +79,38 @@
         });
     }
 
+    function itemImageSlug(name) {
+        return String(name || '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '') || 'default';
+    }
+
+    function openDishModal(item, triggerEl) {
+        if (!modal) {
+            return;
+        }
+        lastFocused = triggerEl || document.activeElement;
+        modalTitle.textContent = item.name || '';
+        modalPrice.textContent = DC.money(item.price);
+        modalDesc.textContent = item.description ? item.description : 'Freshly prepared at the college canteen.';
+        modal.hidden = false;
+        if (modalClose) {
+            modalClose.focus();
+        }
+    }
+
+    function closeDishModal() {
+        if (!modal || modal.hidden) {
+            return;
+        }
+        modal.hidden = true;
+        if (lastFocused && typeof lastFocused.focus === 'function') {
+            lastFocused.focus();
+        }
+        lastFocused = null;
+    }
+
     function renderItems(items) {
         grid.textContent = '';
 
@@ -81,7 +120,32 @@
         }
 
         items.forEach(function (item) {
+            var imgButton = null;
+            if (imageBase) {
+                var img = DC.el('img', {
+                    className: 'menu-image',
+                    src: imageBase + itemImageSlug(item.name) + '.jpg',
+                    alt: item.name,
+                    loading: 'lazy'
+                });
+                img.addEventListener('error', function () {
+                    if (img.getAttribute('data-fallback') !== '1') {
+                        img.setAttribute('data-fallback', '1');
+                        img.src = imageBase + 'default.jpg';
+                    }
+                });
+                imgButton = DC.el('button', {
+                    type: 'button',
+                    className: 'menu-image-btn',
+                    'aria-label': 'View details for ' + item.name
+                }, [img]);
+                imgButton.addEventListener('click', function () {
+                    openDishModal(item, imgButton);
+                });
+            }
+
             var card = DC.el('article', { className: 'menu-card' + (item.is_available ? '' : ' is-unavailable') }, [
+                imgButton,
                 DC.el('p', { className: 'menu-category', text: item.category_name }),
                 DC.el('h3', { text: item.name }),
                 item.description ? DC.el('p', { className: 'menu-description', text: item.description }) : null,
@@ -139,6 +203,22 @@
         window.clearTimeout(searchTimer);
         load();
     });
+
+    if (modalClose) {
+        modalClose.addEventListener('click', closeDishModal);
+    }
+    if (modal) {
+        modal.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                closeDishModal();
+            }
+        });
+        document.addEventListener('keydown', function (event) {
+            if (!modal.hidden && (event.key === 'Escape' || event.keyCode === 27)) {
+                closeDishModal();
+            }
+        });
+    }
 
     load();
 }());

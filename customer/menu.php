@@ -10,6 +10,7 @@ require __DIR__ . '/../includes/header.php';
 <div id="app"
      data-api="<?= e(url('api/customer/menu.php')) ?>"
      data-cart-api="<?= e(url('api/customer/cart.php')) ?>"
+     data-image-base="<?= e(url('assets/images/menu/')) ?>"
      data-csrf="<?= e(csrf_token()) ?>"
      data-login="<?= e(url('login.php')) ?>">
     <section class="panel">
@@ -28,6 +29,16 @@ require __DIR__ . '/../includes/header.php';
     <p id="menu-count" class="menu-count" aria-live="polite"></p>
     <div id="menu-grid" class="menu-grid" aria-busy="true">
         <p class="empty-state">Loading the menu&hellip;</p>
+    </div>
+    <div id="dish-modal" class="dish-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="dish-modal-title" hidden>
+        <div class="dish-modal">
+            <div class="dish-modal-head">
+                <h2 id="dish-modal-title" class="dish-modal-title"></h2>
+                <button id="dish-modal-close" class="button button-secondary button-small" type="button" aria-label="Close dish details">Close</button>
+            </div>
+            <p id="dish-modal-price" class="price dish-modal-price"></p>
+            <p id="dish-modal-desc" class="dish-modal-desc"></p>
+        </div>
     </div>
     <noscript><p class="alert alert-error">JavaScript is required to show the menu.</p></noscript>
 </div>

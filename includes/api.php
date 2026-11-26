@@ -46,6 +46,23 @@ function api_require_role(string $role): array
     return $user;
 }
 
+/**
+ * Any signed-in, active user (customer, kitchen staff or admin).
+ * Used by endpoints that every role may call, such as notifications.
+ *
+ * @return array{id:int,full_name:string,email:string,role:string,is_active:mixed}
+ */
+function api_require_user(): array
+{
+    $user = current_user();
+
+    if ($user === null) {
+        json_response(false, 'Your session has ended. Please log in again.', null, 401);
+    }
+
+    return $user;
+}
+
 /** The token travels in the POST body, so the Phase 1 csrf_verify() is reused. */
 function api_require_csrf(): void
 {

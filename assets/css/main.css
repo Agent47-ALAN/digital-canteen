@@ -1122,3 +1122,357 @@ button:disabled {
         font-size: 0.8rem;
     }
 }
+
+/* ===== Phase 5.2: notification bell, badge and dropdown panel ===== */
+
+/* ---- Bell button ------------------------------------------------- */
+
+.bell-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.bell-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    color: var(--ink);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.bell-button:hover,
+.bell-button:focus-visible {
+    background: var(--surface);
+    border-color: var(--line);
+    color: var(--green);
+    outline: none;
+}
+
+.bell-icon {
+    display: block;
+    width: 1.2rem;
+    height: 1.2rem;
+    pointer-events: none;
+}
+
+/* ---- Unread count badge on the bell ------------------------------ */
+
+.notif-badge {
+    position: absolute;
+    top: -0.2rem;
+    right: -0.3rem;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    padding: 0 0.3rem;
+    border-radius: 999px;
+    background: var(--orange);
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.1rem;
+    text-align: center;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* ---- Dropdown panel ---------------------------------------------- */
+
+.notif-panel {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: 200;
+    width: 22rem;
+    max-height: 28rem;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.13);
+    overflow: hidden;
+}
+
+.notif-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem 0.65rem;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+}
+
+.notif-panel-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--ink);
+}
+
+.notif-mark-all-btn {
+    font-size: 0.82rem;
+    color: var(--green);
+    white-space: nowrap;
+}
+
+.notif-mark-all-btn:hover {
+    color: var(--green-dark);
+}
+
+/* ---- Scrollable list area ---------------------------------------- */
+
+.notif-list {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0;
+}
+
+/* ---- State messages (loading / empty / error) -------------------- */
+
+.notif-state {
+    padding: 1.25rem 1rem;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+    text-align: center;
+}
+
+/* ---- Individual notification item -------------------------------- */
+
+.notif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--line);
+    transition: background 0.1s;
+}
+
+.notif-item:last-child {
+    border-bottom: 0;
+}
+
+.notif-unread {
+    background: #f7f3ec;
+}
+
+.notif-read {
+    background: var(--surface);
+}
+
+.notif-item:hover {
+    background: #f0ece4;
+}
+
+/* ---- Dot indicator (unread = orange, read = transparent) --------- */
+
+.notif-dot {
+    flex-shrink: 0;
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-top: 0.4rem;
+    border-radius: 50%;
+    background: var(--orange);
+}
+
+.notif-dot-read {
+    background: transparent;
+}
+
+/* ---- Notification text body -------------------------------------- */
+
+.notif-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.notif-title {
+    margin: 0 0 0.15rem;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--ink);
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+.notif-title .notif-link {
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.notif-title .notif-link:hover {
+    color: var(--green);
+    text-decoration: underline;
+}
+
+.notif-msg {
+    margin: 0 0 0.25rem;
+    font-size: 0.83rem;
+    color: var(--muted);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.notif-time {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+/* ---- Per-item actions (mark as read button) ---------------------- */
+
+.notif-actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-start;
+}
+
+.notif-read-btn {
+    font-size: 0.75rem;
+    color: var(--green);
+    white-space: nowrap;
+    margin-top: 0.1rem;
+}
+
+.notif-read-btn:hover {
+    color: var(--green-dark);
+}
+
+/* ---- Panel footer (load more button) ----------------------------- */
+
+.notif-panel-foot {
+    padding: 0.6rem 1rem;
+    border-top: 1px solid var(--line);
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.notif-panel-foot .button {
+    width: 100%;
+}
+
+/* ---- Mobile: full-width panel pinned below the header ------------ */
+
+@media (max-width: 540px) {
+    .notif-panel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-height: 70vh;
+        border-radius: 0 0 6px 6px;
+        border-left: 0;
+        border-right: 0;
+        border-top: 0;
+        z-index: 300;
+    }
+}
+
+/* ===== Phase 5.3: push alerts bar inside notification dropdown ===== */
+
+.notif-push-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+}
+
+.notif-push-status {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.3;
+}
+
+.notif-push-btn {
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    padding: 0.28rem 0.6rem;
+}
+
+/* ===== Menu item placeholder images and dish-details popup ===== */
+
+.menu-image-btn {
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin: 0 0 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--bg);
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.menu-image-btn:hover .menu-image {
+    transform: scale(1.02);
+}
+
+.menu-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    transition: transform 0.15s ease;
+}
+
+.dish-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(42, 40, 36, 0.55);
+}
+
+.dish-modal {
+    width: min(26rem, 100%);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--green);
+    border-radius: 6px;
+    padding: 1.25rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.dish-modal-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.dish-modal-title {
+    margin: 0;
+    font-size: 1.35rem;
+}
+
+.dish-modal-price {
+    margin: 0 0 0.75rem;
+    color: var(--green-dark);
+}
+
+.dish-modal-desc {
+    margin: 0;
+    color: var(--muted);
+}

@@ -14,9 +14,9 @@ require_once __DIR__ . '/orders.php';
  * Reads the kitchen queue and moves orders through
  * PLACED -> PREPARING -> READY -> COLLECTED.
  *
- * Kitchen staff can update order status and confirm cash payments
- * after orders have been collected. Status labels, payment labels
- * and time formatting are reused from includes/orders.php.
+ * The kitchen can ONLY change orders.status. It never touches payments,
+ * order items, totals or tokens. Status labels, payment labels and time
+ * formatting are reused from includes/orders.php.
  */
 
 /** The only allowed moves. Anything else is rejected. */
@@ -34,6 +34,13 @@ const KITCHEN_FILTER_STATUSES = ['PLACED', 'PREPARING', 'READY', 'COLLECTED', 'C
 
 const KITCHEN_DEFAULT_LIMIT = 50;
 const KITCHEN_MAX_LIMIT = 100;
+
+/** The notification event for each status the kitchen can set. */
+const KITCHEN_STATUS_EVENTS = [
+    'PREPARING' => 'ORDER_PREPARING',
+    'READY' => 'ORDER_READY',
+    'COLLECTED' => 'ORDER_COLLECTED',
+];
 
 /** A kitchen action that was refused for a reason staff can understand. */
 final class KitchenException extends RuntimeException
@@ -200,11 +207,12 @@ function kitchen_transition_message(string $current, string $requested): string
  * status, finds the move is no longer allowed, and is refused. The UPDATE also
  * repeats the status it expects, as a second safeguard.
  * orders.updated_at changes by itself (ON UPDATE CURRENT_TIMESTAMP).
+ * $actorId is the staff member who clicked; they are not notified about their own action.
  *
  * @return array{order_id:int,previous_status:string,status:string,status_label:string,next_status:?string,next_label:?string}
  * @throws KitchenException|PDOException
  */
-function kitchen_update_status(PDO $pdo, int $orderId, string $requested): array
+function kitchen_update_status(PDO $pdo, int $orderId, string $requested, ?int $actorId = null): array
 {
     // PLACED and CANCELLED can never be set from the kitchen.
     if (!in_array($requested, ['PREPARING', 'READY', 'COLLECTED'], true)) {
@@ -241,6 +249,9 @@ function kitchen_update_status(PDO $pdo, int $orderId, string $requested): array
         throw $exception;
     }
 
+    // The change is saved. Tell the people involved; a problem here is only logged.
+    notify_order_event_safe($pdo, $orderId, KITCHEN_STATUS_EVENTS[$requested], $actorId);
+
     $next = kitchen_next_status($requested);
 
     return [
@@ -250,78 +261,5 @@ function kitchen_update_status(PDO $pdo, int $orderId, string $requested): array
         'status_label' => order_status_label($requested),
         'next_status' => $next,
         'next_label' => $next === null ? null : kitchen_action_label($next),
-    ];
-}
-
-/**
- * Confirm cash received for an order that has already been collected.
- *
- * Both the order and payment rows are locked to prevent simultaneous
- * confirmations. Only a CASH payment with PENDING status can be updated.
- *
- * The order status is never changed by this function.
- *
- * @return array{order_id:int,payment_status:string,payment_status_label:string}
- * @throws KitchenException|PDOException
- */
-function kitchen_confirm_cash_payment(PDO $pdo, int $orderId): array
-{
-    $pdo->beginTransaction();
-
-    try {
-        $orderLock = $pdo->prepare('SELECT status FROM orders WHERE id = ? FOR UPDATE');
-        $orderLock->execute([$orderId]);
-        $orderStatus = $orderLock->fetchColumn();
-
-        if ($orderStatus === false) {
-            throw new KitchenException('Order not found.', 404);
-        }
-
-        if ((string) $orderStatus !== 'COLLECTED') {
-            throw new KitchenException('Cash can only be confirmed after the order has been collected.', 409);
-        }
-
-        $paymentLock = $pdo->prepare('SELECT method, status FROM payments WHERE order_id = ? FOR UPDATE');
-        $paymentLock->execute([$orderId]);
-        $payment = $paymentLock->fetch(PDO::FETCH_ASSOC);
-
-        if ($payment === false) {
-            throw new KitchenException('Payment record not found for this order.', 404);
-        }
-
-        if ((string) $payment['method'] !== 'CASH') {
-            throw new KitchenException('Only cash payments can be confirmed here.', 409);
-        }
-
-        if ((string) $payment['status'] !== 'PENDING') {
-            throw new KitchenException('This cash payment has already been confirmed or is no longer pending.', 409);
-        }
-
-        $update = $pdo->prepare(
-            "UPDATE payments
-             SET status = 'PAID',
-                 note = 'Cash received at the canteen counter.'
-             WHERE order_id = ?
-               AND method = 'CASH'
-               AND status = 'PENDING'"
-        );
-        $update->execute([$orderId]);
-
-        if ($update->rowCount() !== 1) {
-            throw new KitchenException('The payment changed at the same time. Refresh and try again.', 409);
-        }
-
-        $pdo->commit();
-    } catch (Throwable $exception) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
-        throw $exception;
-    }
-
-    return [
-        'order_id' => $orderId,
-        'payment_status' => 'PAID',
-        'payment_status_label' => payment_status_label('PAID'),
     ];
 }

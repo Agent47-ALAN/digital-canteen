@@ -7,6 +7,7 @@ if (isset($_SERVER['SCRIPT_FILENAME']) && realpath((string) $_SERVER['SCRIPT_FIL
 }
 
 require_once __DIR__ . '/cart.php';
+require_once __DIR__ . '/notifications.php';
 
 /**
  * Orders, tokens and the DEMO payment simulator (Phase 3).
@@ -194,6 +195,10 @@ function place_order(
         }
 
         $pdo->commit();
+
+        // The order is saved. Now tell the people involved. This can never undo or
+        // block the order: any problem is only written to the error log.
+        notify_order_event_safe($pdo, $orderId, 'ORDER_PLACED', $userId);
 
         return ['order_id' => $orderId, 'duplicate' => false];
     } catch (Throwable $exception) {
