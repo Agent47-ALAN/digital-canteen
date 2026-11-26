@@ -44,11 +44,67 @@ function render_order_detail(array $order): void
 {
     $method = (string) $order['payment_method'];
     $paymentStatus = (string) $order['payment_status'];
+    $status = (string) $order['status'];
+    $readyEpoch = $order['estimated_ready_epoch'] ?? null;
+    $serverEpoch = $order['server_now_epoch'] ?? time();
+    $readyTime = $order['estimated_ready_at'] ?? null;
+
+    $timerHeading = match ($status) {
+        'PLACED' => 'Order received — preparing shortly',
+        'PREPARING' => 'Preparing your order',
+        'READY' => 'READY FOR COLLECTION',
+        'COLLECTED' => 'Order collected',
+        'CANCELLED' => 'Order cancelled',
+        default => 'Order status',
+    };
+
+    $initialCountdown = '';
+    $timerStateClass = '';
+    if ($status === 'READY') {
+        $timerStateClass = ' is-ready';
+        $initialCountdown = 'READY FOR COLLECTION';
+    } elseif ($status === 'COLLECTED') {
+        $timerStateClass = ' is-done';
+        $initialCountdown = 'Collected';
+    } elseif ($status === 'CANCELLED') {
+        $timerStateClass = ' is-cancelled';
+        $initialCountdown = 'Cancelled';
+    } elseif ($readyEpoch !== null) {
+        $remaining = (int) $readyEpoch - (int) $serverEpoch;
+        if ($remaining <= 0) {
+            $timerStateClass = ' is-overdue';
+            $initialCountdown = 'Taking a little longer than expected';
+        } else {
+            $mins = intdiv($remaining, 60);
+            $secs = $remaining % 60;
+            $initialCountdown = sprintf('%02d:%02d remaining', $mins, $secs);
+        }
+    }
     ?>
     <section class="token-card" aria-label="Order token">
-        <p class="token-label">Your token</p>
+        <p class="token-label">Order #<?= e((string) $order['id']) ?> &bull; Your token</p>
         <p class="token-number"><?= e((string) $order['token_number']) ?></p>
         <p class="token-hint">Show this token at the canteen counter.</p>
+    </section>
+
+    <section id="prep-timer"
+             class="panel section-gap prep-timer-card<?= e($timerStateClass) ?>"
+             aria-label="Estimated preparation time"
+             data-ready-epoch="<?= e($readyEpoch !== null ? (string) $readyEpoch : '') ?>"
+             data-server-epoch="<?= e((string) $serverEpoch) ?>"
+             data-ready-time="<?= e($readyTime !== null ? (string) $readyTime : '') ?>">
+        <p class="eyebrow" data-timer="heading"><?= e($timerHeading) ?></p>
+        <?php if ($initialCountdown !== '' || $readyEpoch !== null): ?>
+            <p class="prep-countdown" data-timer="countdown" aria-live="polite"><?= e($initialCountdown) ?></p>
+        <?php else: ?>
+            <p class="prep-countdown" data-timer="countdown" aria-live="polite"><?= e(order_status_label($status)) ?></p>
+        <?php endif; ?>
+        <?php if ($readyTime !== null && in_array($status, ['PLACED', 'PREPARING'], true)): ?>
+            <p class="prep-ready-time" data-timer="ready-at">Estimated ready time: <strong><?= e((string) $readyTime) ?></strong></p>
+        <?php else: ?>
+            <p class="prep-ready-time" data-timer="ready-at" hidden></p>
+        <?php endif; ?>
+        <p class="hint prep-disclaimer" data-timer="disclaimer"<?= in_array($status, ['PLACED', 'PREPARING'], true) ? '' : ' hidden' ?>>This is an estimate, not a guarantee.</p>
     </section>
 
     <section class="panel section-gap" aria-label="Order progress">

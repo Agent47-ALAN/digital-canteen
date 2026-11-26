@@ -59,10 +59,14 @@ if (is_post()) {
 $pageTitle = 'Log in';
 require __DIR__ . '/includes/header.php';
 ?>
+<div class="auth-wrap">
 <section class="form-card">
+    <div class="auth-logo-wrap">
+        <img class="auth-logo" src="<?= e(url('assets/branding/campusbite-logo.svg')) ?>" alt="CampusBite — Eat, Connect, Belong" width="210" height="102">
+    </div>
     <p class="eyebrow">Account</p>
     <h1>Log in</h1>
-    <p>Use the email and password for your canteen account. You will be taken to the page for your role.</p>
+    <p>Use the email and password for your CampusBite account. You will be taken to the page for your role.</p>
 
     <?php if ($errors !== []): ?>
         <div class="alert alert-error" role="alert">
@@ -88,4 +92,5 @@ require __DIR__ . '/includes/header.php';
     </form>
     <p class="form-note">Need a customer account? <a href="<?= e(url('register.php')) ?>">Create one</a>.</p>
 </section>
+</div>
 <?php require __DIR__ . '/includes/footer.php'; ?>

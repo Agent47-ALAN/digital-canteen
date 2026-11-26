@@ -1,12 +1,12 @@
 {
-  "name": "Digital Canteen",
-  "short_name": "Canteen",
-  "description": "Order food from the college canteen and track your token.",
+  "name": "CampusBite",
+  "short_name": "CampusBite",
+  "description": "Eat • Connect • Belong. Order food from the campus canteen and track your token.",
   "start_url": "/digital_canteen/",
   "scope": "/digital_canteen/",
   "display": "standalone",
-  "background_color": "#f3efe6",
-  "theme_color": "#1e5c40",
+  "background_color": "#F6F4FF",
+  "theme_color": "#5120B5",
   "icons": [
     {
       "src": "/digital_canteen/assets/icons/icon-192.png",

@@ -101,6 +101,19 @@
             parts.push(DC.el('p', { className: 'kitchen-note', text: 'Cash payment is still pending.' }));
         }
 
+        if (showAction && (order.status === 'PLACED' || order.status === 'PREPARING') && order.estimated_ready_at) {
+            var extendBtn = DC.el('button', {
+                type: 'button',
+                className: 'button button-secondary button-small',
+                text: '+5 min'
+            });
+            extendBtn.addEventListener('click', function () { extendPrep(order, extendBtn); });
+            parts.push(DC.el('div', { className: 'kitchen-prep-row' }, [
+                DC.el('span', { className: 'kitchen-meta', text: 'Est. ready: ' + order.estimated_ready_at }),
+                extendBtn
+            ]));
+        }
+
         if (showAction && order.next_status) {
             var button = DC.el('button', {
                 type: 'button',
@@ -269,6 +282,28 @@
             if (collectedOpen) {
                 loadCollected(true);
             }
+        });
+    }
+
+    function extendPrep(order, button) {
+        button.disabled = true;
+        button.textContent = 'Saving\u2026';
+        DC.hideStatus(statusBox);
+
+        DC.request('POST', api, {
+            csrf_token: csrf,
+            action: 'extend_prep',
+            order_id: order.id,
+            minutes: 5
+        }, function (result) {
+            if (DC.sessionEnded(result, loginUrl)) {
+                return;
+            }
+            var label = (order.token_number || ('#' + order.id));
+            DC.showStatus(statusBox, result.success ? 'success' : 'error',
+                label + ': ' + result.message);
+            lastSignature = '';
+            load();
         });
     }
 

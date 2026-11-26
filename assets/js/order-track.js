@@ -23,11 +23,118 @@
     var paymentCell = app.querySelector('[data-track="payment-status"]');
     var steps = app.querySelectorAll('[data-step]');
 
+    var timerCard = document.getElementById('prep-timer');
+    var timerHeading = app.querySelector('[data-timer="heading"]');
+    var timerCountdown = app.querySelector('[data-timer="countdown"]');
+    var timerReadyAt = app.querySelector('[data-timer="ready-at"]');
+    var timerDisclaimer = app.querySelector('[data-timer="disclaimer"]');
+
     var timer = null;
+    var countdownInterval = null;
     var inFlight = false;
+
+    var currentStatus = app.getAttribute('data-status') || '';
+    var readyEpoch = timerCard ? Number(timerCard.getAttribute('data-ready-epoch') || 0) : 0;
+    var serverEpoch = timerCard ? Number(timerCard.getAttribute('data-server-epoch') || 0) : 0;
+    var readyTimeText = timerCard ? (timerCard.getAttribute('data-ready-time') || '') : '';
+    var clockOffsetMs = serverEpoch > 0 ? (serverEpoch * 1000) - Date.now() : 0;
 
     function isFinished(status) {
         return status === 'COLLECTED' || status === 'CANCELLED';
+    }
+
+    function formatRemaining(totalSeconds) {
+        var mins = Math.floor(totalSeconds / 60);
+        var secs = totalSeconds % 60;
+        var mm = mins < 10 ? '0' + mins : String(mins);
+        var ss = secs < 10 ? '0' + secs : String(secs);
+        return mm + ':' + ss + ' remaining';
+    }
+
+    function stopCountdown() {
+        if (countdownInterval !== null) {
+            window.clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+    }
+
+    function renderCountdown() {
+        if (!timerCard || !timerHeading || !timerCountdown) {
+            return;
+        }
+
+        timerCard.classList.remove('is-ready', 'is-overdue', 'is-done', 'is-cancelled');
+
+        if (currentStatus === 'READY') {
+            stopCountdown();
+            timerCard.classList.add('is-ready');
+            timerHeading.textContent = 'Ready at the counter';
+            timerCountdown.textContent = 'READY FOR COLLECTION';
+            if (timerReadyAt) { timerReadyAt.hidden = true; }
+            if (timerDisclaimer) { timerDisclaimer.hidden = true; }
+            return;
+        }
+
+        if (currentStatus === 'COLLECTED') {
+            stopCountdown();
+            timerCard.classList.add('is-done');
+            timerHeading.textContent = 'Order complete';
+            timerCountdown.textContent = 'Collected';
+            if (timerReadyAt) { timerReadyAt.hidden = true; }
+            if (timerDisclaimer) { timerDisclaimer.hidden = true; }
+            return;
+        }
+
+        if (currentStatus === 'CANCELLED') {
+            stopCountdown();
+            timerCard.classList.add('is-cancelled');
+            timerHeading.textContent = 'Order status';
+            timerCountdown.textContent = 'Cancelled';
+            if (timerReadyAt) { timerReadyAt.hidden = true; }
+            if (timerDisclaimer) { timerDisclaimer.hidden = true; }
+            return;
+        }
+
+        timerHeading.textContent = currentStatus === 'PREPARING'
+            ? 'Preparing your order'
+            : 'Order received — preparing shortly';
+
+        if (timerReadyAt) {
+            if (readyTimeText) {
+                timerReadyAt.hidden = false;
+                timerReadyAt.textContent = '';
+                timerReadyAt.appendChild(document.createTextNode('Estimated ready time: '));
+                timerReadyAt.appendChild(DC.el('strong', { text: readyTimeText }));
+            } else {
+                timerReadyAt.hidden = true;
+            }
+        }
+        if (timerDisclaimer) {
+            timerDisclaimer.hidden = false;
+        }
+
+        if (!readyEpoch) {
+            timerCountdown.textContent = currentStatus === 'PREPARING' ? 'In preparation' : 'In queue';
+            return;
+        }
+
+        var nowServerSec = Math.floor((Date.now() + clockOffsetMs) / 1000);
+        var remaining = readyEpoch - nowServerSec;
+
+        if (remaining <= 0) {
+            timerCard.classList.add('is-overdue');
+            timerCountdown.textContent = 'Taking a little longer than expected';
+            return;
+        }
+
+        timerCountdown.textContent = formatRemaining(remaining);
+    }
+
+    function startCountdown() {
+        renderCountdown();
+        if (countdownInterval === null && (currentStatus === 'PLACED' || currentStatus === 'PREPARING')) {
+            countdownInterval = window.setInterval(renderCountdown, 1000);
+        }
     }
 
     function showNote(text) {
@@ -63,6 +170,19 @@
         });
 
         app.setAttribute('data-status', order.status);
+        currentStatus = order.status;
+
+        if (order.server_now_epoch) {
+            clockOffsetMs = (Number(order.server_now_epoch) * 1000) - Date.now();
+        }
+        if (order.estimated_ready_epoch !== undefined && order.estimated_ready_epoch !== null) {
+            readyEpoch = Number(order.estimated_ready_epoch);
+        }
+        if (order.estimated_ready_at !== undefined && order.estimated_ready_at !== null) {
+            readyTimeText = order.estimated_ready_at;
+        }
+
+        startCountdown();
     }
 
     function stop() {
@@ -112,6 +232,7 @@
     }
 
     // A finished order never changes again, so there is nothing to poll.
+    startCountdown();
     if (isFinished(app.getAttribute('data-status') || '')) {
         return;
     }

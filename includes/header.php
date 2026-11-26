@@ -8,7 +8,7 @@ if (isset($_SERVER['SCRIPT_FILENAME']) && realpath((string) $_SERVER['SCRIPT_FIL
 
 $pageTitle = (isset($pageTitle) && is_string($pageTitle) && $pageTitle !== '')
     ? $pageTitle
-    : 'Digital Canteen';
+    : 'CampusBite';
 $currentUser = current_user();
 $homePath = $currentUser ? home_path_for_role($currentUser['role']) : null;
 $cartItemCount = 0;
@@ -16,36 +16,50 @@ if ($currentUser && $currentUser['role'] === 'CUSTOMER') {
     require_once __DIR__ . '/cart.php';
     $cartItemCount = cart_count((int) $currentUser['id']);
 }
+$isCustomer = $currentUser && $currentUser['role'] === 'CUSTOMER';
+$activeScript = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#1e5c40">
-    <title><?= e($pageTitle) ?> · Digital Canteen</title>
+    <meta name="theme-color" content="#5120B5">
+    <title><?= e($pageTitle) ?> · CampusBite</title>
     <?php if (!empty($robotsNoIndex)): ?>
         <meta name="robots" content="noindex, nofollow">
     <?php endif; ?>
+    <link rel="icon" type="image/svg+xml" href="<?= e(url('assets/branding/campusbite-symbol.svg')) ?>">
+    <link rel="apple-touch-icon" href="<?= e(url('assets/icons/icon-192.png')) ?>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
     <link rel="manifest" href="<?= e(url('manifest.webmanifest')) ?>">
     <link rel="stylesheet" href="<?= e(url('assets/css/main.css')) ?>">
 </head>
-<body>
+<body class="<?= $isCustomer ? 'has-bottom-nav' : '' ?>">
     <header class="site-header">
         <div class="shell header-row">
-            <a class="brand" href="<?= e(url('index.php')) ?>">Digital Canteen</a>
+            <a class="brand" href="<?= e(url($homePath ?? 'index.php')) ?>">
+                <span class="brand-mark" aria-hidden="true">
+                    <img src="<?= e(url('assets/branding/campusbite-symbol.svg')) ?>" alt="" width="26" height="22">
+                </span>
+                <span>CampusBite</span>
+            </a>
             <nav class="site-nav" aria-label="Main">
-                <a href="<?= e(url('index.php')) ?>">Home</a>
+                <?php if (!$currentUser): ?>
+                    <a class="<?= str_ends_with($activeScript, '/index.php') ? 'is-active' : '' ?>" href="<?= e(url('index.php')) ?>">Home</a>
+                <?php endif; ?>
                 <?php if ($currentUser && $homePath): ?>
-                    <a href="<?= e(url($homePath)) ?>">Dashboard</a>
+                    <a class="<?= $isCustomer ? 'nav-customer-link ' : '' ?><?= str_ends_with($activeScript, '/' . $homePath) ? 'is-active' : '' ?>" href="<?= e(url($homePath)) ?>">Dashboard</a>
                     <?php if ($currentUser['role'] === 'CUSTOMER'): ?>
-                        <a href="<?= e(url('customer/menu.php')) ?>">Menu</a>
-                        <a href="<?= e(url('customer/cart.php')) ?>">Cart <span class="cart-count" data-cart-count<?= $cartItemCount > 0 ? '' : ' hidden' ?>><?= e((string) $cartItemCount) ?></span></a>
-                        <a href="<?= e(url('customer/orders.php')) ?>">My orders</a>
+                        <a class="nav-customer-link <?= str_ends_with($activeScript, '/customer/menu.php') ? 'is-active' : '' ?>" href="<?= e(url('customer/menu.php')) ?>">Menu</a>
+                        <a class="nav-customer-link <?= str_ends_with($activeScript, '/customer/cart.php') ? 'is-active' : '' ?>" href="<?= e(url('customer/cart.php')) ?>">Cart <span class="cart-count" data-cart-count<?= $cartItemCount > 0 ? '' : ' hidden' ?>><?= e((string) $cartItemCount) ?></span></a>
+                        <a class="nav-customer-link <?= (str_ends_with($activeScript, '/customer/orders.php') || str_ends_with($activeScript, '/customer/order.php')) ? 'is-active' : '' ?>" href="<?= e(url('customer/orders.php')) ?>">My orders</a>
                     <?php elseif ($currentUser['role'] === 'ADMIN'): ?>
-                        <a href="<?= e(url('admin/categories.php')) ?>">Categories</a>
-                        <a href="<?= e(url('admin/foods.php')) ?>">Food items</a>
-                        <a href="<?= e(url('admin/staff.php')) ?>">Staff</a>
+                        <a class="<?= str_ends_with($activeScript, '/admin/categories.php') ? 'is-active' : '' ?>" href="<?= e(url('admin/categories.php')) ?>">Categories</a>
+                        <a class="<?= str_ends_with($activeScript, '/admin/foods.php') ? 'is-active' : '' ?>" href="<?= e(url('admin/foods.php')) ?>">Food items</a>
+                        <a class="<?= str_ends_with($activeScript, '/admin/staff.php') ? 'is-active' : '' ?>" href="<?= e(url('admin/staff.php')) ?>">Staff</a>
                     <?php endif; ?>
                     <form method="post" action="<?= e(url('logout.php')) ?>">
                         <?= csrf_field() ?>
@@ -105,8 +119,8 @@ if ($currentUser && $currentUser['role'] === 'CUSTOMER') {
                     </div>
 
                 <?php else: ?>
-                    <a href="<?= e(url('login.php')) ?>">Log in</a>
-                    <a href="<?= e(url('register.php')) ?>">Create account</a>
+                    <a class="<?= str_ends_with($activeScript, '/login.php') ? 'is-active' : '' ?>" href="<?= e(url('login.php')) ?>">Log in</a>
+                    <a class="<?= str_ends_with($activeScript, '/register.php') ? 'is-active' : '' ?>" href="<?= e(url('register.php')) ?>">Create account</a>
                 <?php endif; ?>
             </nav>
         </div>

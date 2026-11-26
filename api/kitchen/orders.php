@@ -41,15 +41,22 @@ try {
 
     api_require_csrf();
 
-    if (post_value('action') !== 'update_status') {
+    $action = post_value('action');
+    if ($action !== 'update_status' && $action !== 'extend_prep') {
         json_response(false, 'Unknown action.', null, 400);
     }
 
-    // Only an order id and the wanted status are read. Nothing about payments,
+    // Only an order id and the wanted status/adjustment are read. Nothing about payments,
     // items, totals or customers is accepted from the browser.
     $orderId = api_int(post_value('order_id'));
     if ($orderId === null) {
         json_response(false, 'That order could not be found.', null, 422);
+    }
+
+    if ($action === 'extend_prep') {
+        $addMinutes = api_int(post_value('minutes')) ?? 5;
+        $updated = kitchen_extend_prep($pdo, $orderId, $addMinutes);
+        json_response(true, 'Estimated ready time updated (+' . $addMinutes . ' min).', ['order' => $updated]);
     }
 
     $result = kitchen_update_status($pdo, $orderId, post_value('status'), (int) $user['id']);

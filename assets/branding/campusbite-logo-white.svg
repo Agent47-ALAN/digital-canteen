@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 175" fill="none" role="img" aria-label="CampusBite — Eat, Connect, Belong">
+  <!-- Symbol centered at top (white & soft lavender for dark backgrounds) -->
+  <g transform="translate(120, 4)">
+    <path d="M24 38C10 52 14 78 44 86C58 90 74 88 86 82C66 86 44 82 32 70C22 60 22 47 24 38Z" fill="#D8C4FF"/>
+    <path d="M36 44L30 28C22 25 20 15 27 10C31 7 37 8 40 11C44 5 55 5 60 11C66 8 73 12 72 20C71 25 66 28 60 29L57 40" stroke="#FFFFFF" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M35 42C42 36 51 34 59 37" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round"/>
+    <path d="M84 44C80 35 89 27 86 17C93 23 93 34 88 43C87 45 85 45 84 44Z" fill="#D8C4FF"/>
+    <path d="M93 48C92 41 100 35 98 27C104 33 103 42 96 48C95 49 93 49 93 48Z" fill="#EEE4FF"/>
+    <path d="M68 42C68 39.8 69.8 38 72 38C74.2 38 76 39.8 76 42" fill="#FFFFFF"/>
+    <path d="M46 66C46 52 57.5 42 72 42C86.5 42 98 52 98 66H46Z" fill="#FFFFFF"/>
+    <path d="M84 52C88 55 91 59 92 63" stroke="#28166F" stroke-width="2.6" stroke-linecap="round"/>
+    <rect x="40" y="66" width="64" height="6" rx="3" fill="#FFFFFF"/>
+    <path d="M42 54C32 61 33 73 48 77C64 81 88 77 104 68C88 74 65 76 52 72C40 69 38 60 42 54Z" fill="#FFFFFF"/>
+  </g>
+  <!-- Sparkles above 'e' -->
+  <ellipse cx="322" cy="96" rx="4" ry="7" transform="rotate(14 322 96)" fill="#D8C4FF"/>
+  <ellipse cx="335" cy="103" rx="3.5" ry="6" transform="rotate(42 335 103)" fill="#D8C4FF"/>
+  <!-- Wordmark -->
+  <text x="180" y="138" text-anchor="middle" font-family="Poppins, Segoe UI, Arial, sans-serif" font-size="42" font-weight="800" letter-spacing="-1">
+    <tspan fill="#FFFFFF">Campus</tspan><tspan fill="#D8C4FF">Bite</tspan>
+  </text>
+  <!-- Tagline -->
+  <line x1="36" y1="159" x2="76" y2="159" stroke="#D8C4FF" stroke-width="1.6" stroke-linecap="round"/>
+  <text x="180" y="164" text-anchor="middle" font-family="Poppins, Segoe UI, Arial, sans-serif" font-size="14" font-style="italic" font-weight="500" letter-spacing="0.4" fill="#EEE4FF">Eat &#x2022; Connect &#x2022; Belong</text>
+  <line x1="284" y1="159" x2="324" y2="159" stroke="#D8C4FF" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

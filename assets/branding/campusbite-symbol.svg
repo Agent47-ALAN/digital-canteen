@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100" fill="none" role="img" aria-label="CampusBite symbol">
+  <defs>
+    <linearGradient id="cb-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8128F5"/>
+      <stop offset="100%" stop-color="#5120B5"/>
+    </linearGradient>
+  </defs>
+  <!-- Left swoosh -->
+  <path d="M24 38C10 52 14 78 44 86C58 90 74 88 86 82C66 86 44 82 32 70C22 60 22 47 24 38Z" fill="url(#cb-purple)"/>
+  <!-- Chef hat -->
+  <path d="M36 44L30 28C22 25 20 15 27 10C31 7 37 8 40 11C44 5 55 5 60 11C66 8 73 12 72 20C71 25 66 28 60 29L57 40" stroke="#20145E" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" fill="#FFFFFF"/>
+  <path d="M35 42C42 36 51 34 59 37" stroke="#20145E" stroke-width="3.6" stroke-linecap="round"/>
+  <!-- Steam wisps -->
+  <path d="M84 44C80 35 89 27 86 17C93 23 93 34 88 43C87 45 85 45 84 44Z" fill="url(#cb-purple)"/>
+  <path d="M93 48C92 41 100 35 98 27C104 33 103 42 96 48C95 49 93 49 93 48Z" fill="#A46AEF"/>
+  <!-- Cloche dome & tray -->
+  <path d="M68 42C68 39.8 69.8 38 72 38C74.2 38 76 39.8 76 42" fill="#20145E"/>
+  <path d="M46 66C46 52 57.5 42 72 42C86.5 42 98 52 98 66H46Z" fill="#20145E"/>
+  <path d="M84 52C88 55 91 59 92 63" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round"/>
+  <rect x="40" y="66" width="64" height="6" rx="3" fill="#20145E"/>
+  <!-- Under-tray arc -->
+  <path d="M42 54C32 61 33 73 48 77C64 81 88 77 104 68C88 74 65 76 52 72C40 69 38 60 42 54Z" fill="#20145E"/>
+</svg>

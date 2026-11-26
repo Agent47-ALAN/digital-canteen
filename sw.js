@@ -13,10 +13,10 @@ self.addEventListener('activate', function (event) {
 
 self.addEventListener('push', function (event) {
     var payload = {
-        title: 'Digital Canteen',
+        title: 'CampusBite',
         body: 'You have a new order update.',
         url: '/digital_canteen/',
-        tag: 'digital-canteen-notification'
+        tag: 'campusbite-notification'
     };
 
     if (event.data) {

@@ -28,6 +28,7 @@ require_once __DIR__ . '/notifications.php';
 
 const PAYMENT_METHODS = ['CASH', 'DEMO_ONLINE'];
 const ORDER_PAGE_SIZE = 10;
+const DEFAULT_PREP_MINUTES = 15;
 
 /** A problem the customer can understand and act on (bad cart, expired page...). */
 final class CheckoutException extends RuntimeException
@@ -139,12 +140,14 @@ function place_order(
         }
 
         $total = $cart['total'];
+        $prepMinutes = DEFAULT_PREP_MINUTES;
 
         try {
             $insertOrder = $pdo->prepare(
-                'INSERT INTO orders (user_id, status, total_amount, checkout_token) VALUES (?, ?, ?, ?)'
+                'INSERT INTO orders (user_id, status, total_amount, checkout_token, estimated_prep_minutes, estimated_ready_at)
+                 VALUES (?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE))'
             );
-            $insertOrder->execute([$userId, 'PLACED', $total, $checkoutToken]);
+            $insertOrder->execute([$userId, 'PLACED', $total, $checkoutToken, $prepMinutes, $prepMinutes]);
         } catch (PDOException $exception) {
             if (is_duplicate_key($exception, 'uq_orders_checkout_token')) {
                 // Another request with the same checkout token won the race.
@@ -276,6 +279,17 @@ function format_order_time(string $databaseTime): string
     return $date instanceof DateTime ? $date->format('d M Y, h:i A') : $databaseTime;
 }
 
+function format_ready_time(?string $databaseTime): ?string
+{
+    if ($databaseTime === null || $databaseTime === '') {
+        return null;
+    }
+
+    $date = DateTime::createFromFormat('Y-m-d H:i:s', $databaseTime);
+
+    return $date instanceof DateTime ? $date->format('g:i A') : $databaseTime;
+}
+
 /**
  * Shape one joined order row for the pages and the JSON API.
  *
@@ -286,6 +300,15 @@ function order_summary_from_row(array $row): array
 {
     $method = (string) ($row['payment_method'] ?? '');
     $paymentStatus = (string) ($row['payment_status'] ?? '');
+    $prepMinutes = isset($row['estimated_prep_minutes']) && $row['estimated_prep_minutes'] !== null
+        ? (int) $row['estimated_prep_minutes']
+        : null;
+    $readyEpoch = isset($row['estimated_ready_epoch']) && $row['estimated_ready_epoch'] !== null
+        ? (int) $row['estimated_ready_epoch']
+        : null;
+    $serverNowEpoch = isset($row['server_now_epoch']) && $row['server_now_epoch'] !== null
+        ? (int) $row['server_now_epoch']
+        : time();
 
     return [
         'id' => (int) $row['id'],
@@ -300,6 +323,10 @@ function order_summary_from_row(array $row): array
         'payment_method_label' => payment_method_label($method),
         'payment_status' => $paymentStatus,
         'payment_status_label' => payment_status_label($paymentStatus),
+        'estimated_prep_minutes' => $prepMinutes,
+        'estimated_ready_at' => format_ready_time(isset($row['estimated_ready_at']) ? (string) $row['estimated_ready_at'] : null),
+        'estimated_ready_epoch' => $readyEpoch,
+        'server_now_epoch' => $serverNowEpoch,
     ];
 }
 
@@ -314,6 +341,9 @@ function order_for_user(PDO $pdo, int $orderId, int $userId): ?array
 {
     $statement = $pdo->prepare(
         'SELECT o.id, o.status, o.total_amount, o.placed_at,
+                o.estimated_prep_minutes, o.estimated_ready_at,
+                UNIX_TIMESTAMP(o.estimated_ready_at) AS estimated_ready_epoch,
+                UNIX_TIMESTAMP(NOW()) AS server_now_epoch,
                 t.token_number, p.method AS payment_method, p.status AS payment_status,
                 (SELECT COALESCE(SUM(oi.quantity), 0) FROM order_items oi WHERE oi.order_id = o.id) AS item_count
          FROM orders o
@@ -357,6 +387,9 @@ function orders_for_user(PDO $pdo, int $userId, int $page): array
 
     $statement = $pdo->prepare(
         'SELECT o.id, o.status, o.total_amount, o.placed_at,
+                o.estimated_prep_minutes, o.estimated_ready_at,
+                UNIX_TIMESTAMP(o.estimated_ready_at) AS estimated_ready_epoch,
+                UNIX_TIMESTAMP(NOW()) AS server_now_epoch,
                 t.token_number, p.method AS payment_method, p.status AS payment_status,
                 (SELECT COALESCE(SUM(oi.quantity), 0) FROM order_items oi WHERE oi.order_id = o.id) AS item_count
          FROM orders o

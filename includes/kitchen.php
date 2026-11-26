@@ -118,6 +118,9 @@ function kitchen_orders(PDO $pdo, ?string $status, int $page, int $limit): array
 
     $statement = $pdo->prepare(
         'SELECT o.id, o.status, o.total_amount, o.placed_at, o.updated_at,
+                o.estimated_prep_minutes, o.estimated_ready_at,
+                UNIX_TIMESTAMP(o.estimated_ready_at) AS estimated_ready_epoch,
+                UNIX_TIMESTAMP(NOW()) AS server_now_epoch,
                 TIMESTAMPDIFF(MINUTE, o.placed_at, NOW()) AS age_minutes,
                 u.full_name AS customer_name,
                 t.token_number,
@@ -261,5 +264,57 @@ function kitchen_update_status(PDO $pdo, int $orderId, string $requested, ?int $
         'status_label' => order_status_label($requested),
         'next_status' => $next,
         'next_label' => $next === null ? null : kitchen_action_label($next),
+    ];
+}
+
+/**
+ * Extend the estimated ready time for an active order (PLACED or PREPARING).
+ *
+ * @return array{order_id:int,estimated_prep_minutes:int,estimated_ready_at:?string}
+ * @throws KitchenException|PDOException
+ */
+function kitchen_extend_prep(PDO $pdo, int $orderId, int $addMinutes = 5): array
+{
+    if ($addMinutes < 1 || $addMinutes > 30) {
+        throw new KitchenException('Choose a valid time adjustment.', 422);
+    }
+
+    $pdo->beginTransaction();
+    try {
+        $lock = $pdo->prepare('SELECT status FROM orders WHERE id = ? FOR UPDATE');
+        $lock->execute([$orderId]);
+        $current = $lock->fetchColumn();
+
+        if ($current === false) {
+            throw new KitchenException('Order not found.', 404);
+        }
+        if (!in_array((string) $current, ['PLACED', 'PREPARING'], true)) {
+            throw new KitchenException('Preparation time can only be adjusted while an order is Placed or Preparing.', 409);
+        }
+
+        $update = $pdo->prepare(
+            'UPDATE orders
+             SET estimated_prep_minutes = COALESCE(estimated_prep_minutes, ?) + ?,
+                 estimated_ready_at = DATE_ADD(GREATEST(COALESCE(estimated_ready_at, NOW()), NOW()), INTERVAL ? MINUTE)
+             WHERE id = ?'
+        );
+        $update->execute([DEFAULT_PREP_MINUTES, $addMinutes, $addMinutes, $orderId]);
+
+        $read = $pdo->prepare('SELECT estimated_prep_minutes, estimated_ready_at FROM orders WHERE id = ? LIMIT 1');
+        $read->execute([$orderId]);
+        $row = $read->fetch();
+
+        $pdo->commit();
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $exception;
+    }
+
+    return [
+        'order_id' => $orderId,
+        'estimated_prep_minutes' => (int) ($row['estimated_prep_minutes'] ?? DEFAULT_PREP_MINUTES),
+        'estimated_ready_at' => format_ready_time(isset($row['estimated_ready_at']) ? (string) $row['estimated_ready_at'] : null),
     ];
 }

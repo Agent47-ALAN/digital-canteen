@@ -12,11 +12,13 @@ if ($user === null) {
 $pageTitle = 'Kitchen dashboard';
 require __DIR__ . '/../includes/header.php';
 ?>
-<section class="panel">
-    <p class="eyebrow">Kitchen</p>
+<section class="hero-banner">
+    <p class="eyebrow">CampusBite &bull; Kitchen</p>
     <h1>Hello, <?= e($user['full_name']) ?></h1>
-    <p>You are signed in as kitchen staff. New orders appear below and the queue refreshes by itself every 10 seconds.</p>
-    <dl class="details">
+    <p class="lede">Live CampusBite order queue. New orders appear automatically and refresh every 10 seconds.</p>
+</section>
+<section class="panel section-gap">
+    <dl class="details" style="margin-top:0">
         <div>
             <dt>Name</dt>
             <dd><?= e($user['full_name']) ?></dd>
